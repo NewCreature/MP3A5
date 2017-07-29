@@ -56,13 +56,16 @@ static void * mp3a5_thread_proc(ALLEGRO_THREAD * tp, void * data)
 	unsigned char *fragment;
     size_t done;
     int bytes_left;
-    int i;
+    int i, r;
 
 	queue = al_create_event_queue();
 	al_register_event_source(queue, al_get_audio_stream_event_source(mp3->audio_stream));
     al_set_audio_stream_playing(mp3->audio_stream, true);
+    mp3->paused = false;
+    mp3->done = false;
+    bool end_of_mp3 = false;
 
-	while(1)
+	while(!end_of_mp3)
 	{
 		ALLEGRO_EVENT event;
 
@@ -82,13 +85,15 @@ static void * mp3a5_thread_proc(ALLEGRO_THREAD * tp, void * data)
                     bytes_left = sizeof(unsigned short) * mp3->buffer_size * 2;
                     while(bytes_left > 0)
                     {
-                        if(mpg123_read(mp3->mp3, fragment, sizeof(unsigned short) * mp3->buffer_size * 2, &done) != MPG123_OK)
+                        r = mpg123_read(mp3->mp3, fragment, sizeof(unsigned short) * mp3->buffer_size * 2, &done);
+                        if(r != MPG123_OK && r != MPG123_NEW_FORMAT)
                         {
                             bytes_left -= done;
                             for(i = sizeof(unsigned short) * mp3->buffer_size * 2 - bytes_left; i < sizeof(unsigned short) * mp3->buffer_size * 2; i++)
                             {
                                 fragment[i] = 0;
                             }
+                            end_of_mp3 = true;
                             break;
                         }
                         else
@@ -108,6 +113,7 @@ static void * mp3a5_thread_proc(ALLEGRO_THREAD * tp, void * data)
 		}
 	}
 	al_destroy_event_queue(queue);
+    mp3->done = true;
     return NULL;
 }
 
@@ -142,6 +148,8 @@ void mp3a5_stop_mp3(MP3A5_MP3 * mp)
         mp->thread = NULL;
         al_destroy_audio_stream(mp->audio_stream);
         mp->audio_stream = NULL;
+        mpg123_close(mp->mp3);
+        mp->mp3 = NULL;
     }
 }
 

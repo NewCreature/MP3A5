@@ -17,6 +17,7 @@ typedef struct
     ALLEGRO_THREAD * thread;
     int buffer_size;
     bool paused;
+    bool done;
 
 } MP3A5_MP3;
 
