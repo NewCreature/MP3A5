@@ -1,0 +1,16 @@
+MP3A5
+-----
+
+MP3A5 is a small module to interface mpg123 with Allegro 5 for playing back MP3
+files in your Allegro 5 projects. The API looks like this and is pretty self-
+explanatory:
+
+bool mp3a5_init(void);
+void mp3a5_exit(void);
+
+MP3A5_MP3 * mp3a5_load_mp3(const char *filename);
+void mp3a5_destroy_mp3(MP3A5_MP3 * mp);
+bool mp3a5_play_mp3(MP3A5_MP3 * mp, size_t buffer_count, unsigned int samples);
+void mp3a5_stop_mp3(MP3A5_MP3 * mp);
+void mp3a5_pause_mp3(MP3A5_MP3 * mp);
+void mp3a5_resume_mp3(MP3A5_MP3 * mp);
