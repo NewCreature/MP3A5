@@ -15,6 +15,7 @@ typedef struct
     ALLEGRO_AUDIO_STREAM * audio_stream;
     mpg123_handle * mp3;
     ALLEGRO_THREAD * thread;
+    int buffer_size;
     bool paused;
 
 } MP3A5_MP3;

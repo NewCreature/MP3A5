@@ -75,17 +75,17 @@ static void * mp3a5_thread_proc(ALLEGRO_THREAD * tp, void * data)
 			{
 				if(mp3->paused)
 				{
-					memset(fragment, 0, sizeof(unsigned short) * 1024 * 2);
+					memset(fragment, 0, sizeof(unsigned short) * mp3->buffer_size * 2);
 				}
 				else
 				{
-                    bytes_left = sizeof(unsigned short) * 1024 * 2;
+                    bytes_left = sizeof(unsigned short) * mp3->buffer_size * 2;
                     while(bytes_left > 0)
                     {
-                        if(mpg123_read(mp3->mp3, fragment, sizeof(unsigned short) * 1024 * 2, &done) != MPG123_OK)
+                        if(mpg123_read(mp3->mp3, fragment, sizeof(unsigned short) * mp3->buffer_size * 2, &done) != MPG123_OK)
                         {
                             bytes_left -= done;
-                            for(i = sizeof(unsigned short) * 1024 * 2 - bytes_left; i < sizeof(unsigned short) * 1024 * 2; i++)
+                            for(i = sizeof(unsigned short) * mp3->buffer_size * 2 - bytes_left; i < sizeof(unsigned short) * mp3->buffer_size * 2; i++)
                             {
                                 fragment[i] = 0;
                             }
@@ -116,6 +116,7 @@ bool mp3a5_play_mp3(MP3A5_MP3 * mp, size_t buffer_count, unsigned int samples)
     mp->audio_stream = al_create_audio_stream(buffer_count, samples, 44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
     if(mp->audio_stream)
     {
+        mp->buffer_size = samples;
         mp->thread = al_create_thread(mp3a5_thread_proc, mp);
         if(mp->thread)
         {
